@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="6943c938-adcf-44cc-8de3-c60efd7e97ea" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="aaaaFlow" doc:id="35f316f8-ef5e-4c66-a325-909b3112bde8" >
+		<http:listener doc:name="Listener" doc:id="3ddda5e6-90f7-48db-8881-74a015d25093" config-ref="HTTP_Listener_config" path="/demo"/>
+		<logger level="INFO" doc:name="Logger" doc:id="0e5123d9-965d-4640-b31c-f92f1fce5a7f" message='#["----------------start " ++ flow.name as String ++ "--------------------"]'/>
+		<set-payload value="#[[5,10,15,20,25,30,35,40,45,50]]" doc:name="Set Payload" doc:id="2e392320-2688-4411-95ae-6481aecab14f" />
+		<logger level="INFO" doc:name="Logger" doc:id="be3c467f-f56f-4ba4-a0e3-952be75758c4" message="#[payload]"/>
+		<set-variable value="#[[]]" doc:name="Set Variable" doc:id="ccb46723-7530-4b0c-912e-439f321b8b76" variableName="resultVar"/>
+		<foreach doc:name="For Each" doc:id="2fc93483-b8ab-4f57-9e13-d9ce7b604ba3" batchSize="2">
+			<ee:transform doc:name="Transform Message" doc:id="82dfa628-5c04-423a-a699-e77b98f3f0c9" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item) -> item * 2]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<set-variable value="#[output application/json&#10;---&#10;vars.resultVar + (payload)]" doc:name="Set Variable" doc:id="46f5c98a-e567-44f9-8114-a5b1d1675622" variableName="resultVar"/>
+			<logger level="INFO" doc:name="Logger" doc:id="38012474-6739-4095-872a-7588a39eb4eb" message="#[vars.resultVar]"/>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="918650fa-56e8-401e-95f7-f8e0c3b3aa74">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.resultVar]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="61ee1a64-b690-4be7-beb6-b8f16686d1c1" message="#[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="6b2d49ec-67bb-4d26-a15f-9354465a3a1e" message="#[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="5c786e4a-2736-4b3e-bb2f-253daa1aafee" message="#[payload]"/>
+	</flow>
+</mule>
